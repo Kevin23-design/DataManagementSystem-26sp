@@ -15,3 +15,11 @@ mongod --dbpath="E:\Software_Data\MongoDB\data\testdb"
 ```bash
 mongosh
 ```
+
+# 打印 jupyter notebook
+
+```bash
+jupyter notebook
+```
+
+网页访问，file->save as html->ctrl P 打印成pdf 
