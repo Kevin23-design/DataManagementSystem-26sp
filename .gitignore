@@ -47,7 +47,13 @@ Thumbs.db
 Desktop.ini
 
 # Temp folders
+.npm_cache/
 .npm-cache/
+_cacache/
+**/.npm_cache/
+**/.npm-cache/
+**/_cacache/
+
 .tmp/
 tmp/
 
