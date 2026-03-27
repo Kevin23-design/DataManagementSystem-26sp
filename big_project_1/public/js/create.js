@@ -199,21 +199,68 @@ function updateFormByType() {
     `;
   }
   validationArea.innerHTML = validationHtml;
+
+  // 当题型切换时，清空原本的跳转规则（因为规则的值类型可能不匹配了）
+  jumpRulesList.innerHTML = '';
 }
 
 function addOption(val) {
   const div = document.createElement('div');
   div.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;';
   div.innerHTML = `
-    <input type="text" class="form-control option-input" value="${escapeHtml(val)}" placeholder="选项内容">
-    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">×</button>
+    <input type="text" class="form-control option-input" value="${escapeHtml(val)}" placeholder="选项内容" oninput="updateJumpRuleOptions()">
+    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove(); updateJumpRuleOptions()">×</button>
   `;
   optionsList.appendChild(div);
+  updateJumpRuleOptions();
 }
 
 document.getElementById('addOptionBtn').addEventListener('click', () => addOption(''));
 
+function getOptionValues() {
+  const options = [];
+  document.querySelectorAll('.option-input').forEach(input => {
+    const v = input.value.trim();
+    if (v) options.push(v);
+  });
+  return options;
+}
+
+// 更新所有现有的跳转规则选项（当在选择题模式下选项发生变化时调用）
+function updateJumpRuleOptions() {
+  const type = qTypeSelect.value;
+  if (type !== 'single_choice' && type !== 'multiple_choice') return;
+  
+  const options = getOptionValues();
+  document.querySelectorAll('#jumpRulesList > div').forEach(div => {
+    const select = div.querySelector('.jump-cond-value-select');
+    if (select) {
+      const currentVal = select.value;
+      select.innerHTML = options.map(o => 
+        `<option value="${escapeHtml(o)}" ${o === currentVal ? 'selected' : ''}>${escapeHtml(o)}</option>`
+      ).join('');
+      // 如果原来的值不在新选项里，且有新选项，默认选第一个
+      if (!options.includes(currentVal) && options.length > 0) {
+        select.value = options[0];
+      }
+    }
+  });
+}
+
 function addJumpRule(condType = 'equals', condValue = '', target = '') {
+  const type = qTypeSelect.value;
+  const isChoice = type === 'single_choice' || type === 'multiple_choice';
+  
+  let valueInputHtml;
+  if (isChoice) {
+    const options = getOptionValues();
+    valueInputHtml = `<select class="form-control jump-cond-value jump-cond-value-select" style="flex:1;min-width:80px;">
+      ${options.map(o => `<option value="${escapeHtml(o)}" ${String(o) === String(condValue) ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('')}
+    </select>`;
+  } else {
+    valueInputHtml = `<input type="text" class="form-control jump-cond-value" value="${escapeHtml(String(condValue))}" placeholder="值" style="flex:1;min-width:80px;">`;
+  }
+
   const div = document.createElement('div');
   div.style.cssText = 'display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center;';
   div.innerHTML = `
@@ -225,7 +272,7 @@ function addJumpRule(condType = 'equals', condValue = '', target = '') {
       <option value="gte" ${condType === 'gte' ? 'selected' : ''}>大于等于</option>
       <option value="lte" ${condType === 'lte' ? 'selected' : ''}>小于等于</option>
     </select>
-    <input type="text" class="form-control jump-cond-value" value="${escapeHtml(String(condValue))}" placeholder="值" style="flex:1;min-width:80px;">
+    ${valueInputHtml}
     <span style="font-size:0.8rem;color:var(--text-secondary);">→ 第</span>
     <input type="number" class="form-control jump-target" value="${target}" placeholder="题号" style="width:70px;" min="1">
     <span style="font-size:0.8rem;color:var(--text-secondary);">题</span>

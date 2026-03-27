@@ -35,7 +35,7 @@ function getNextQuestionOrder(question, answerValue, defaultNextOrder) {
  * Bug 2 & 4 修复: 统一用 String 比较消除类型差异
  */
 function matchCondition(questionType, condition, answerValue) {
-  const { type: condType, value: condValue } = condition;
+  const { type: condType, value: condValue } = condition || {};
 
   switch (condType) {
     case 'equals':
@@ -52,14 +52,26 @@ function matchCondition(questionType, condition, answerValue) {
       }
       return false;
 
-    case 'gt':
-      return Number(answerValue) > Number(condValue);
-    case 'lt':
-      return Number(answerValue) < Number(condValue);
-    case 'gte':
-      return Number(answerValue) >= Number(condValue);
-    case 'lte':
-      return Number(answerValue) <= Number(condValue);
+    case 'gt': {
+      const a = Number(answerValue);
+      const b = Number(condValue);
+      return Number.isFinite(a) && Number.isFinite(b) && a > b;
+    }
+    case 'lt': {
+      const a = Number(answerValue);
+      const b = Number(condValue);
+      return Number.isFinite(a) && Number.isFinite(b) && a < b;
+    }
+    case 'gte': {
+      const a = Number(answerValue);
+      const b = Number(condValue);
+      return Number.isFinite(a) && Number.isFinite(b) && a >= b;
+    }
+    case 'lte': {
+      const a = Number(answerValue);
+      const b = Number(condValue);
+      return Number.isFinite(a) && Number.isFinite(b) && a <= b;
+    }
 
     default:
       return false;

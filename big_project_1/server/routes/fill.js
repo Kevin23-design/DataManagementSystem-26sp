@@ -70,14 +70,29 @@ router.post('/:shareCode/submit', optionalAuth, async (req, res) => {
     // 构建 answers map: questionId -> value
     const answerMap = {};
     for (const ans of submittedAnswers) {
-      answerMap[ans.questionId] = ans.value;
+      if (!ans || ans.questionId === undefined || ans.questionId === null) continue;
+      answerMap[String(ans.questionId)] = ans.value;
     }
 
     // 模拟填写过程，按跳转逻辑验证
     const validatedAnswers = [];
     let currentIdx = 0;
+    const visitedIdx = new Set();
+    const maxSteps = questions.length + 5;
+    let stepCount = 0;
 
     while (currentIdx < questions.length) {
+      // 防止跳转环导致接口卡死
+      if (visitedIdx.has(currentIdx)) {
+        break;
+      }
+      visitedIdx.add(currentIdx);
+
+      stepCount += 1;
+      if (stepCount > maxSteps) {
+        break;
+      }
+
       const question = questions[currentIdx];
       const value = answerMap[question._id.toString()];
 
