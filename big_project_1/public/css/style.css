@@ -122,6 +122,24 @@ a:hover {
   color: var(--text-secondary);
 }
 
+.nav-user-btn {
+  max-width: 180px;
+  border: 0;
+  background: transparent;
+  padding: 0.28rem 0.45rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.nav-user-btn:hover {
+  background: #f4f4f5;
+}
+
+.nav-user-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(9 9 11 / 0.24);
+}
+
 /* ===== Buttons ===== */
 .btn {
   display: inline-flex;
@@ -635,6 +653,10 @@ select.form-control {
   }
 
   .nav-user {
+    max-width: 120px;
+  }
+
+  .nav-user-btn {
     max-width: 120px;
   }
 

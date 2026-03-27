@@ -10,7 +10,9 @@
   <nav class="nav">
     <span class="nav-brand">问卷系统</span>
     <div class="nav-actions">
-      <span class="nav-user" id="navUser"></span>
+      <button class="nav-user-btn" id="navUserBtn" type="button" title="查看账户信息">
+        <span class="nav-user" id="navUser"></span>
+      </button>
       <button class="btn btn-outline btn-sm" id="logoutBtn">退出</button>
     </div>
   </nav>
@@ -56,6 +58,25 @@
           <button type="submit" class="btn btn-primary">创建</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <div id="userInfoModal" class="modal hidden">
+    <div class="modal-panel">
+      <h2 class="modal-title">账户信息</h2>
+      <div class="card mb-1">
+        <div class="form-group mb-2">
+          <label>用户名</label>
+          <div id="profileUsername" class="text-secondary"></div>
+        </div>
+        <div class="form-group">
+          <label>注册时间</label>
+          <div id="profileCreatedAt" class="text-secondary">加载中...</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="closeUserInfo">关闭</button>
+      </div>
     </div>
   </div>
 

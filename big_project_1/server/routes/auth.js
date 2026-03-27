@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -55,6 +56,11 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: '服务器错误' });
   }
+});
+
+// GET /api/auth/me
+router.get('/me', auth, async (req, res) => {
+  res.json({ user: req.user });
 });
 
 module.exports = router;

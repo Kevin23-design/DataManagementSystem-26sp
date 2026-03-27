@@ -1,10 +1,18 @@
 const API = '';
 const token = localStorage.getItem('token');
 const username = localStorage.getItem('username');
+let userCreatedAt = localStorage.getItem('userCreatedAt');
 
 if (!token) window.location.href = '/index.html';
 
-document.getElementById('navUser').textContent = username || '';
+const navUserEl = document.getElementById('navUser');
+const navUserBtn = document.getElementById('navUserBtn');
+const userInfoModal = document.getElementById('userInfoModal');
+const profileUsernameEl = document.getElementById('profileUsername');
+const profileCreatedAtEl = document.getElementById('profileCreatedAt');
+const closeUserInfoBtn = document.getElementById('closeUserInfo');
+
+navUserEl.textContent = username || '';
 document.getElementById('logoutBtn').addEventListener('click', () => {
   localStorage.clear();
   window.location.href = '/index.html';
@@ -27,6 +35,57 @@ function headers() {
 }
 
 const statusLabels = { draft: '草稿', published: '已发布', closed: '已关闭' };
+
+function formatDateTime(dateLike) {
+  if (!dateLike) return '暂无数据';
+  const date = new Date(dateLike);
+  if (Number.isNaN(date.getTime())) return '暂无数据';
+  return date.toLocaleString('zh-CN', { hour12: false });
+}
+
+function showUserInfoModal() {
+  profileUsernameEl.textContent = username || '未知用户';
+  profileCreatedAtEl.textContent = formatDateTime(userCreatedAt);
+  userInfoModal.classList.remove('hidden');
+  userInfoModal.style.display = 'flex';
+}
+
+function hideUserInfoModal() {
+  userInfoModal.classList.add('hidden');
+  userInfoModal.style.display = 'none';
+}
+
+navUserBtn.addEventListener('click', showUserInfoModal);
+closeUserInfoBtn.addEventListener('click', hideUserInfoModal);
+
+userInfoModal.addEventListener('click', (e) => {
+  if (e.target === userInfoModal) {
+    hideUserInfoModal();
+  }
+});
+
+async function syncCurrentUserProfile() {
+  try {
+    const res = await fetch(`${API}/api/auth/me`, { headers: headers() });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.user) return;
+
+    if (data.user.username) {
+      localStorage.setItem('username', data.user.username);
+      navUserEl.textContent = data.user.username;
+      profileUsernameEl.textContent = data.user.username;
+    }
+
+    if (data.user.createdAt) {
+      userCreatedAt = data.user.createdAt;
+      localStorage.setItem('userCreatedAt', data.user.createdAt);
+      profileCreatedAtEl.textContent = formatDateTime(data.user.createdAt);
+    }
+  } catch (_) {
+    // 保持静默，避免影响问卷主流程
+  }
+}
 
 async function loadSurveys() {
   try {
@@ -186,3 +245,4 @@ function escapeHtml(str) {
 }
 
 loadSurveys();
+syncCurrentUserProfile();
