@@ -354,7 +354,7 @@ questionForm.addEventListener('submit', async (e) => {
     const tgt = div.querySelector('.jump-target').value;
     if (cv && tgt) {
       jumpRules.push({
-        condition: { type: ct, value: isNaN(Number(cv)) ? cv : Number(cv) },
+        condition: { type: ct, value: cv },
         targetQuestionOrder: Number(tgt),
       });
     }

@@ -7,13 +7,15 @@
 function validateAnswer(question, value) {
   const { type, required: isRequired, options, validation } = question;
 
-  // 检查必答题
-  if (isRequired && (value === undefined || value === null || value === '')) {
+  // 检查必答题（含多选空数组）
+  const isEmpty = value === undefined || value === null || value === ''
+    || (Array.isArray(value) && value.length === 0);
+  if (isRequired && isEmpty) {
     return { valid: false, message: `"${question.title}" 为必答题` };
   }
 
   // 非必答且无值，跳过
-  if (value === undefined || value === null || value === '') {
+  if (isEmpty) {
     return { valid: true };
   }
 

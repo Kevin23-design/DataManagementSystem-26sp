@@ -12,6 +12,15 @@ function getNextQuestionOrder(question, answerValue, defaultNextOrder) {
     return defaultNextOrder;
   }
 
+  // Bug 1 修复: 没有作答时不尝试匹配跳转规则，直接走默认
+  if (answerValue === undefined || answerValue === null || answerValue === '') {
+    return defaultNextOrder;
+  }
+  // 多选空数组也视为未作答
+  if (Array.isArray(answerValue) && answerValue.length === 0) {
+    return defaultNextOrder;
+  }
+
   for (const rule of question.jumpRules) {
     if (matchCondition(question.type, rule.condition, answerValue)) {
       return rule.targetQuestionOrder;
@@ -23,17 +32,14 @@ function getNextQuestionOrder(question, answerValue, defaultNextOrder) {
 
 /**
  * 匹配单个条件
+ * Bug 2 & 4 修复: 统一用 String 比较消除类型差异
  */
 function matchCondition(questionType, condition, answerValue) {
   const { type: condType, value: condValue } = condition;
 
   switch (condType) {
     case 'equals':
-      // 单选：值相等
-      if (questionType === 'single_choice') {
-        return answerValue === condValue;
-      }
-      // 数字：数值相等
+      // 统一转 String 比较，避免前后端 "25" vs 25 不一致
       if (questionType === 'number_input') {
         return Number(answerValue) === Number(condValue);
       }
@@ -42,7 +48,7 @@ function matchCondition(questionType, condition, answerValue) {
     case 'contains':
       // 多选：答案数组包含某选项
       if (Array.isArray(answerValue)) {
-        return answerValue.includes(condValue);
+        return answerValue.map(String).includes(String(condValue));
       }
       return false;
 

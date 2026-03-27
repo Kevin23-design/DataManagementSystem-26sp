@@ -8,7 +8,7 @@
 </head>
 <body>
   <nav class="nav">
-    <a href="/dashboard.html" class="nav-brand">📋 问卷系统</a>
+    <a href="/dashboard.html" class="nav-brand">问卷系统</a>
     <div class="nav-actions">
       <span class="nav-user" id="navUser"></span>
     </div>
@@ -17,7 +17,7 @@
   <div class="container">
     <div class="page-header">
       <h1 id="pageTitle">编辑问卷</h1>
-      <div style="display:flex;gap:8px;">
+      <div class="inline-actions">
         <button class="btn btn-outline btn-sm" id="backBtn">← 返回</button>
         <button class="btn btn-primary btn-sm" id="addQuestionBtn">+ 添加题目</button>
       </div>
@@ -25,17 +25,14 @@
 
     <div id="alert"></div>
 
-    <!-- 问卷信息 -->
     <div class="card mb-2" id="surveyInfo"></div>
 
-    <!-- 题目列表 -->
-    <div id="questionList"></div>
+    <div id="questionList" class="stack"></div>
   </div>
 
-  <!-- 添加/编辑题目弹窗 -->
-  <div id="questionModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:200;overflow-y:auto;padding:24px 0;">
-    <div class="card" style="width:100%;max-width:600px;margin:auto;">
-      <h2 id="modalTitle" style="margin-bottom:20px;">添加题目</h2>
+  <div id="questionModal" class="modal hidden">
+    <div class="modal-panel">
+      <h2 id="modalTitle" class="modal-title">添加题目</h2>
       <form id="questionForm">
         <div class="form-group">
           <label for="qTitle">题目标题</label>
@@ -52,10 +49,9 @@
         </div>
         <div class="form-group checkbox-group">
           <input type="checkbox" id="qRequired">
-          <label for="qRequired" style="margin-bottom:0;">必答题</label>
+          <label for="qRequired">必答题</label>
         </div>
 
-        <!-- 选项区域 -->
         <div id="optionsArea">
           <div class="form-group">
             <label>选项</label>
@@ -64,10 +60,8 @@
           </div>
         </div>
 
-        <!-- 校验区域 -->
         <div id="validationArea"></div>
 
-        <!-- 跳转规则区域 -->
         <div id="jumpRulesArea">
           <div class="form-group">
             <label>跳转规则</label>
@@ -76,7 +70,7 @@
           </div>
         </div>
 
-        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;">
+        <div class="modal-footer">
           <button type="button" class="btn btn-outline" id="cancelQuestion">取消</button>
           <button type="submit" class="btn btn-primary" id="saveQuestionBtn">保存</button>
         </div>

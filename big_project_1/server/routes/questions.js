@@ -118,7 +118,15 @@ router.delete('/questions/:id', auth, async (req, res) => {
       return res.status(400).json({ error: '只能在草稿状态删除题目' });
     }
 
+    const deletedOrder = question.order;
     await Question.findByIdAndDelete(question._id);
+
+    // Bug 5 修复: 级联清理指向被删题目的跳转规则
+    await Question.updateMany(
+      { surveyId: question.surveyId, 'jumpRules.targetQuestionOrder': deletedOrder },
+      { $pull: { jumpRules: { targetQuestionOrder: deletedOrder } } },
+    );
+
     res.json({ message: '题目已删除' });
   } catch (err) {
     res.status(500).json({ error: '服务器错误' });

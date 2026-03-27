@@ -19,7 +19,6 @@ const successArea = document.getElementById('successArea');
 
 let surveyInfo = null;
 let questions = [];
-let currentIndex = 0;
 let answers = {}; // questionId -> value
 
 function showAlert(msg, type = 'error') {
@@ -61,6 +60,7 @@ async function loadSurvey() {
     }
 
     renderAllQuestions();
+    applyJumpVisibility();
     submitArea.classList.remove('hidden');
   } catch (err) {
     document.getElementById('surveyTitle').textContent = '无法加载';
@@ -69,7 +69,7 @@ async function loadSurvey() {
 }
 
 function renderAllQuestions() {
-  questionArea.innerHTML = questions.map((q, idx) => `
+  questionArea.innerHTML = questions.map(q => `
     <div class="card fill-question" id="q-${q._id}" data-order="${q.order}">
       <h3 style="margin-bottom:12px;">
         <span style="color:var(--accent);margin-right:6px;">${q.order}.</span>
@@ -106,11 +106,11 @@ function renderQuestionInput(q) {
 
     case 'text_input':
       return `<textarea class="form-control" placeholder="请输入..."
-        oninput="answers['${q._id}'] = this.value"></textarea>`;
+        oninput="handleInputChange('${q._id}', this.value)"></textarea>`;
 
     case 'number_input':
       return `<input type="number" class="form-control" placeholder="请输入数字"
-        oninput="answers['${q._id}'] = this.value" step="any">`;
+        oninput="handleInputChange('${q._id}', this.value)" step="any">`;
 
     default:
       return '';
@@ -138,6 +138,108 @@ function renderHint(q) {
   return `<p style="margin-top:8px;font-size:0.8rem;color:var(--text-secondary);">提示: ${parts.join(', ')}</p>`;
 }
 
+function matchCondition(questionType, condition, answerValue) {
+  const condType = condition?.type;
+  const condValue = condition?.value;
+
+  switch (condType) {
+    case 'equals':
+      if (questionType === 'number_input') return Number(answerValue) === Number(condValue);
+      return String(answerValue) === String(condValue);
+    case 'contains':
+      return Array.isArray(answerValue) ? answerValue.map(String).includes(String(condValue)) : false;
+    case 'gt':
+      return Number(answerValue) > Number(condValue);
+    case 'lt':
+      return Number(answerValue) < Number(condValue);
+    case 'gte':
+      return Number(answerValue) >= Number(condValue);
+    case 'lte':
+      return Number(answerValue) <= Number(condValue);
+    default:
+      return false;
+  }
+}
+
+function getNextQuestionOrder(question, answerValue, defaultNextOrder) {
+  if (!question.jumpRules || question.jumpRules.length === 0) {
+    return defaultNextOrder;
+  }
+
+  // 未作答时不匹配跳转规则
+  if (answerValue === undefined || answerValue === null || answerValue === '') {
+    return defaultNextOrder;
+  }
+  if (Array.isArray(answerValue) && answerValue.length === 0) {
+    return defaultNextOrder;
+  }
+
+  for (const rule of question.jumpRules) {
+    if (matchCondition(question.type, rule.condition, answerValue)) {
+      return rule.targetQuestionOrder;
+    }
+  }
+
+  return defaultNextOrder;
+}
+
+function getVisibleQuestionIdSet() {
+  const visible = new Set();
+  if (questions.length === 0) return visible;
+
+  const orderToIndex = new Map(questions.map((q, idx) => [q.order, idx]));
+  const visited = new Set();
+  let idx = 0;
+
+  while (idx >= 0 && idx < questions.length && !visited.has(idx)) {
+    visited.add(idx);
+    const question = questions[idx];
+    visible.add(String(question._id));
+
+    const defaultNextOrder = idx + 1 < questions.length ? questions[idx + 1].order : null;
+    const answerValue = answers[String(question._id)];
+    const nextOrder = getNextQuestionOrder(question, answerValue, defaultNextOrder);
+
+    if (nextOrder == null) break;
+    if (!orderToIndex.has(nextOrder)) break;
+    idx = orderToIndex.get(nextOrder);
+  }
+
+  return visible;
+}
+
+function getVisibleQuestionsInOrder() {
+  const visibleSet = getVisibleQuestionIdSet();
+  return questions.filter(q => visibleSet.has(String(q._id)));
+}
+
+function applyJumpVisibility() {
+  const visibleSet = getVisibleQuestionIdSet();
+  questions.forEach(q => {
+    const qId = String(q._id);
+    const el = document.getElementById(`q-${q._id}`);
+    if (!el) return;
+    const isVisible = visibleSet.has(qId);
+    el.classList.toggle('hidden', !isVisible);
+    // Bug 7 修复: 隐藏的题目清除旧答案，避免幽灵答案
+    if (!isVisible && answers[qId] !== undefined) {
+      delete answers[qId];
+    }
+  });
+}
+
+function scrollToNextVisibleQuestion(currentQuestionId) {
+  const ordered = getVisibleQuestionsInOrder();
+  const idx = ordered.findIndex(q => String(q._id) === String(currentQuestionId));
+  if (idx === -1 || idx + 1 >= ordered.length) return;
+
+  const next = ordered[idx + 1];
+  const nextEl = document.getElementById(`q-${next._id}`);
+  if (nextEl) {
+    nextEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
 // 单选
 window.selectSingle = function(qId, value, el) {
   answers[qId] = value;
@@ -145,6 +247,8 @@ window.selectSingle = function(qId, value, el) {
   parent.querySelectorAll('.option-item').forEach(li => li.classList.remove('selected'));
   el.classList.add('selected');
   el.querySelector('input[type="radio"]').checked = true;
+  applyJumpVisibility();
+  scrollToNextVisibleQuestion(qId);
 };
 
 // 多选
@@ -160,12 +264,20 @@ window.toggleMultiple = function(qId, value, el) {
     el.classList.add('selected');
     el.querySelector('input[type="checkbox"]').checked = true;
   }
+  applyJumpVisibility();
+};
+
+window.handleInputChange = function(qId, value) {
+  answers[qId] = value;
+  applyJumpVisibility();
 };
 
 // 提交
 document.getElementById('submitBtn').addEventListener('click', async () => {
+  const visibleQuestions = getVisibleQuestionsInOrder();
+
   // 构建 answers 数组
-  const submittedAnswers = questions
+  const submittedAnswers = visibleQuestions
     .filter(q => answers[q._id] !== undefined && answers[q._id] !== '' && answers[q._id] !== null)
     .map(q => ({
       questionId: q._id,
@@ -173,7 +285,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     }));
 
   // 检查必答题
-  for (const q of questions) {
+  for (const q of visibleQuestions) {
     if (q.required) {
       const val = answers[q._id];
       if (val === undefined || val === null || val === '' || (Array.isArray(val) && val.length === 0)) {
