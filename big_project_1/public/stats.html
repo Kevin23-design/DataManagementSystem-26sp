@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>问卷系统 - 统计结果</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="/dashboard.html" class="nav-brand">📋 问卷系统</a>
+    <div class="nav-actions">
+      <span class="nav-user" id="navUser"></span>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 id="pageTitle">统计结果</h1>
+      <button class="btn btn-outline btn-sm" id="backBtn">← 返回</button>
+    </div>
+
+    <div id="alert"></div>
+
+    <div class="card mb-2" id="overviewCard">
+      <div class="stat-number">
+        <div class="stat-number-item">
+          <div class="value" id="totalResponses">0</div>
+          <div class="label">总回答数</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="statsContainer"></div>
+  </div>
+
+  <script src="/js/stats.js"></script>
+</body>
+</html>

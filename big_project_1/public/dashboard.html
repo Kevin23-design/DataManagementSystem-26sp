@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>问卷系统 - 我的问卷</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="nav">
+    <span class="nav-brand">📋 问卷系统</span>
+    <div class="nav-actions">
+      <span class="nav-user" id="navUser"></span>
+      <button class="btn btn-outline btn-sm" id="logoutBtn">退出</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>我的问卷</h1>
+      <button class="btn btn-primary" id="createBtn">+ 创建问卷</button>
+    </div>
+
+    <div id="alert"></div>
+    <div id="surveyList"></div>
+    <p id="emptyTip" class="text-center text-secondary hidden" style="margin-top:48px;">
+      还没有问卷，点击上方按钮创建一个吧 🎯
+    </p>
+  </div>
+
+  <!-- 创建问卷弹窗 -->
+  <div id="createModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:200;">
+    <div class="card" style="width:100%;max-width:500px;">
+      <h2 style="margin-bottom:20px;">创建问卷</h2>
+      <form id="createForm">
+        <div class="form-group">
+          <label for="surveyTitle">问卷标题</label>
+          <input type="text" id="surveyTitle" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="surveyDesc">问卷说明</label>
+          <textarea id="surveyDesc" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="surveyDeadline">截止时间（可选）</label>
+          <input type="datetime-local" id="surveyDeadline" class="form-control">
+        </div>
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="surveyAnonymous">
+          <label for="surveyAnonymous" style="margin-bottom:0;">允许匿名填写</label>
+        </div>
+        <div style="display:flex;gap:12px;justify-content:flex-end;">
+          <button type="button" class="btn btn-outline" id="cancelCreate">取消</button>
+          <button type="submit" class="btn btn-primary">创建</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

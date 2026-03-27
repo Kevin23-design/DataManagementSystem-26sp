@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>问卷系统 - 编辑问卷</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="/dashboard.html" class="nav-brand">📋 问卷系统</a>
+    <div class="nav-actions">
+      <span class="nav-user" id="navUser"></span>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1 id="pageTitle">编辑问卷</h1>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline btn-sm" id="backBtn">← 返回</button>
+        <button class="btn btn-primary btn-sm" id="addQuestionBtn">+ 添加题目</button>
+      </div>
+    </div>
+
+    <div id="alert"></div>
+
+    <!-- 问卷信息 -->
+    <div class="card mb-2" id="surveyInfo"></div>
+
+    <!-- 题目列表 -->
+    <div id="questionList"></div>
+  </div>
+
+  <!-- 添加/编辑题目弹窗 -->
+  <div id="questionModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:200;overflow-y:auto;padding:24px 0;">
+    <div class="card" style="width:100%;max-width:600px;margin:auto;">
+      <h2 id="modalTitle" style="margin-bottom:20px;">添加题目</h2>
+      <form id="questionForm">
+        <div class="form-group">
+          <label for="qTitle">题目标题</label>
+          <input type="text" id="qTitle" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="qType">题目类型</label>
+          <select id="qType" class="form-control">
+            <option value="single_choice">单选题</option>
+            <option value="multiple_choice">多选题</option>
+            <option value="text_input">文本填空</option>
+            <option value="number_input">数字填空</option>
+          </select>
+        </div>
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="qRequired">
+          <label for="qRequired" style="margin-bottom:0;">必答题</label>
+        </div>
+
+        <!-- 选项区域 -->
+        <div id="optionsArea">
+          <div class="form-group">
+            <label>选项</label>
+            <div id="optionsList"></div>
+            <button type="button" class="btn btn-outline btn-sm mt-2" id="addOptionBtn">+ 添加选项</button>
+          </div>
+        </div>
+
+        <!-- 校验区域 -->
+        <div id="validationArea"></div>
+
+        <!-- 跳转规则区域 -->
+        <div id="jumpRulesArea">
+          <div class="form-group">
+            <label>跳转规则</label>
+            <div id="jumpRulesList"></div>
+            <button type="button" class="btn btn-outline btn-sm mt-2" id="addJumpRuleBtn">+ 添加跳转规则</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;">
+          <button type="button" class="btn btn-outline" id="cancelQuestion">取消</button>
+          <button type="submit" class="btn btn-primary" id="saveQuestionBtn">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/create.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="在线问卷系统 - 创建、分发和统计问卷">
+  <title>问卷系统 - 登录</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-box">
+      <h1>📋 问卷系统</h1>
+      <p class="subtitle">创建和管理你的问卷</p>
+      <div id="alert"></div>
+
+      <!-- 登录表单 -->
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginUsername">用户名</label>
+          <input type="text" id="loginUsername" class="form-control" placeholder="请输入用户名" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">密码</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="请输入密码" required>
+        </div>
+        <button type="submit" class="btn btn-primary">登录</button>
+      </form>
+
+      <!-- 注册表单 -->
+      <form id="registerForm" class="hidden">
+        <div class="form-group">
+          <label for="regUsername">用户名</label>
+          <input type="text" id="regUsername" class="form-control" placeholder="2-30个字符" required>
+        </div>
+        <div class="form-group">
+          <label for="regPassword">密码</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="至少6个字符" required>
+        </div>
+        <div class="form-group">
+          <label for="regPassword2">确认密码</label>
+          <input type="password" id="regPassword2" class="form-control" placeholder="再次输入密码" required>
+        </div>
+        <button type="submit" class="btn btn-primary">注册</button>
+      </form>
+
+      <div class="auth-toggle">
+        <span id="toggleText">还没有账号？</span>
+        <a href="#" id="toggleLink">立即注册</a>
+      </div>
+    </div>
+  </div>
+  <script src="/js/auth.js"></script>
+</body>
+</html>
