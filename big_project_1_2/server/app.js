@@ -7,6 +7,8 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const surveyRoutes = require('./routes/surveys');
 const questionRoutes = require('./routes/questions');
+const questionLibRoutes = require('./routes/questionLib');
+const questionBankRoutes = require('./routes/questionBank');
 const fillRoutes = require('./routes/fill');
 const statsRoutes = require('./routes/stats');
 
@@ -20,6 +22,8 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // 路由
 app.use('/api/auth', authRoutes);
 app.use('/api/surveys', surveyRoutes);
+app.use('/api/questions', questionLibRoutes);
+app.use('/api/question-banks', questionBankRoutes);
 app.use('/api', questionRoutes);
 app.use('/api/survey', fillRoutes);
 app.use('/api/surveys', statsRoutes);

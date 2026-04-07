@@ -14,6 +14,7 @@ const surveyInfoEl = document.getElementById('surveyInfo');
 const questionListEl = document.getElementById('questionList');
 const questionModal = document.getElementById('questionModal');
 const questionForm = document.getElementById('questionForm');
+const pickModal = document.getElementById('pickModal');
 
 let editingQuestionId = null;
 let surveyData = null;
@@ -61,6 +62,7 @@ async function loadSurvey() {
     // 非草稿状态禁用编辑
     if (surveyData.status !== 'draft') {
       document.getElementById('addQuestionBtn').classList.add('hidden');
+      document.getElementById('pickQuestionBtn').classList.add('hidden');
     }
 
     await loadQuestions();
@@ -83,7 +85,7 @@ async function loadQuestions() {
     };
 
     if (questionsData.length === 0) {
-      questionListEl.innerHTML = '<p class="text-center text-secondary" style="margin-top:32px;">暂无题目，点击"添加题目"开始</p>';
+      questionListEl.innerHTML = '<p class="text-center text-secondary" style="margin-top:32px;">暂无题目，点击"新建题目"或"从题目库选题"开始</p>';
       return;
     }
 
@@ -93,12 +95,15 @@ async function loadQuestions() {
         <div class="question-header">
           <div>
             <h3 style="margin-bottom:4px;">${escapeHtml(q.title)} ${q.required ? '<span style="color:var(--danger);">*</span>' : ''}</h3>
-            <span class="question-type">${typeLabels[q.type]}</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span class="question-type">${typeLabels[q.type]}</span>
+              ${q.version > 1 ? `<span class="badge badge-draft">v${q.version}</span>` : ''}
+            </div>
           </div>
           ${surveyData.status === 'draft' ? `
           <div style="display:flex;gap:6px;">
             <button class="btn btn-outline btn-sm" onclick="editQuestion('${q._id}')">编辑</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteQuestion('${q._id}')">删除</button>
+            <button class="btn btn-danger btn-sm" onclick="removeQuestion('${q._id}')">移除</button>
           </div>
           ` : ''}
         </div>
@@ -141,7 +146,7 @@ function renderValidation(q) {
   return `<div style="margin-top:6px;font-size:0.8rem;color:var(--text-secondary);">校验: ${parts.join(', ')}</div>`;
 }
 
-// ===== 题目编辑弹窗 =====
+// ===== 新建题目弹窗 =====
 const qTypeSelect = document.getElementById('qType');
 const optionsArea = document.getElementById('optionsArea');
 const validationArea = document.getElementById('validationArea');
@@ -175,7 +180,6 @@ function updateFormByType() {
   const isChoice = type === 'single_choice' || type === 'multiple_choice';
   optionsArea.classList.toggle('hidden', !isChoice);
 
-  // 动态校验字段
   let validationHtml = '';
   if (type === 'multiple_choice') {
     validationHtml = `
@@ -199,8 +203,6 @@ function updateFormByType() {
     `;
   }
   validationArea.innerHTML = validationHtml;
-
-  // 当题型切换时，清空原本的跳转规则（因为规则的值类型可能不匹配了）
   jumpRulesList.innerHTML = '';
 }
 
@@ -208,53 +210,26 @@ function addOption(val) {
   const div = document.createElement('div');
   div.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;';
   div.innerHTML = `
-    <input type="text" class="form-control option-input" value="${escapeHtml(val)}" placeholder="选项内容" oninput="updateJumpRuleOptions()">
-    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove(); updateJumpRuleOptions()">×</button>
+    <input type="text" class="form-control option-input" value="${escapeHtml(val)}" placeholder="选项内容">
+    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">×</button>
   `;
   optionsList.appendChild(div);
-  updateJumpRuleOptions();
 }
 
 document.getElementById('addOptionBtn').addEventListener('click', () => addOption(''));
 
-function getOptionValues() {
-  const options = [];
-  document.querySelectorAll('.option-input').forEach(input => {
-    const v = input.value.trim();
-    if (v) options.push(v);
-  });
-  return options;
-}
-
-// 更新所有现有的跳转规则选项（当在选择题模式下选项发生变化时调用）
-function updateJumpRuleOptions() {
-  const type = qTypeSelect.value;
-  if (type !== 'single_choice' && type !== 'multiple_choice') return;
-  
-  const options = getOptionValues();
-  document.querySelectorAll('#jumpRulesList > div').forEach(div => {
-    const select = div.querySelector('.jump-cond-value-select');
-    if (select) {
-      const currentVal = select.value;
-      select.innerHTML = options.map(o => 
-        `<option value="${escapeHtml(o)}" ${o === currentVal ? 'selected' : ''}>${escapeHtml(o)}</option>`
-      ).join('');
-      // 如果原来的值不在新选项里，且有新选项，默认选第一个
-      if (!options.includes(currentVal) && options.length > 0) {
-        select.value = options[0];
-      }
-    }
-  });
-}
-
 function addJumpRule(condType = 'equals', condValue = '', target = '') {
   const type = qTypeSelect.value;
   const isChoice = type === 'single_choice' || type === 'multiple_choice';
-  
+
   let valueInputHtml;
   if (isChoice) {
-    const options = getOptionValues();
-    valueInputHtml = `<select class="form-control jump-cond-value jump-cond-value-select" style="flex:1;min-width:80px;">
+    const options = [];
+    document.querySelectorAll('.option-input').forEach(input => {
+      const v = input.value.trim();
+      if (v) options.push(v);
+    });
+    valueInputHtml = `<select class="form-control jump-cond-value" style="flex:1;min-width:80px;">
       ${options.map(o => `<option value="${escapeHtml(o)}" ${String(o) === String(condValue) ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('')}
     </select>`;
   } else {
@@ -294,13 +269,11 @@ window.editQuestion = function(qId) {
   document.getElementById('qType').value = q.type;
   document.getElementById('qRequired').checked = q.required;
 
-  // options
   optionsList.innerHTML = '';
   if (q.options) q.options.forEach(o => addOption(o));
 
   updateFormByType();
 
-  // fill validation
   const v = q.validation || {};
   if (q.type === 'multiple_choice') {
     if (v.minSelect) safeSet('vMinSelect', v.minSelect);
@@ -318,7 +291,6 @@ window.editQuestion = function(qId) {
     }
   }
 
-  // jump rules
   jumpRulesList.innerHTML = '';
   if (q.jumpRules) {
     q.jumpRules.forEach(r => addJumpRule(r.condition.type, r.condition.value, r.targetQuestionOrder));
@@ -333,11 +305,11 @@ function safeSet(id, val) {
   if (el) el.value = val;
 }
 
-// 删除题目
-window.deleteQuestion = async function(qId) {
-  if (!confirm('确定删除这道题？')) return;
+// 移除题目（从问卷）
+window.removeQuestion = async function(qId) {
+  if (!confirm('确定从问卷移除这道题？（题目本身不会被删除）')) return;
   try {
-    const res = await fetch(`${API}/api/questions/${qId}`, {
+    const res = await fetch(`${API}/api/surveys/${surveyId}/questions/${qId}`, {
       method: 'DELETE',
       headers: headers(),
     });
@@ -345,20 +317,19 @@ window.deleteQuestion = async function(qId) {
       const data = await res.json();
       throw new Error(data.error);
     }
-    showAlert('已删除', 'success');
+    showAlert('已移除', 'success');
     loadQuestions();
   } catch (err) {
     showAlert(err.message);
   }
 };
 
-// 保存题目
+// 保存题目（新建到问卷内 或 编辑已有题目）
 questionForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const type = qTypeSelect.value;
   const isChoice = type === 'single_choice' || type === 'multiple_choice';
 
-  // 收集选项
   const options = [];
   if (isChoice) {
     document.querySelectorAll('.option-input').forEach(input => {
@@ -370,7 +341,6 @@ questionForm.addEventListener('submit', async (e) => {
     }
   }
 
-  // 收集校验
   const validation = {};
   if (type === 'multiple_choice') {
     const mins = document.getElementById('vMinSelect')?.value;
@@ -393,7 +363,6 @@ questionForm.addEventListener('submit', async (e) => {
     if (io) validation.integerOnly = true;
   }
 
-  // 收集跳转规则
   const jumpRules = [];
   document.querySelectorAll('#jumpRulesList > div').forEach(div => {
     const ct = div.querySelector('.jump-cond-type').value;
@@ -419,13 +388,15 @@ questionForm.addEventListener('submit', async (e) => {
   try {
     let res;
     if (editingQuestionId) {
+      // 编辑已有题目（通过兼容路由）
       res = await fetch(`${API}/api/questions/${editingQuestionId}`, {
         method: 'PUT',
         headers: headers(),
         body: JSON.stringify(body),
       });
     } else {
-      res = await fetch(`${API}/api/surveys/${surveyId}/questions`, {
+      // 问卷内新建题目
+      res = await fetch(`${API}/api/surveys/${surveyId}/questions/new`, {
         method: 'POST',
         headers: headers(),
         body: JSON.stringify(body),
@@ -441,5 +412,70 @@ questionForm.addEventListener('submit', async (e) => {
     showAlert(err.message);
   }
 });
+
+// ===== 从题目库选题 =====
+document.getElementById('pickQuestionBtn').addEventListener('click', async () => {
+  try {
+    const res = await fetch(`${API}/api/questions`, { headers: headers() });
+    if (!res.ok) throw new Error('加载题目库失败');
+    const allQuestions = await res.json();
+
+    const typeLabels = {
+      single_choice: '单选题',
+      multiple_choice: '多选题',
+      text_input: '文本填空',
+      number_input: '数字填空',
+    };
+
+    // 已在问卷中的题目ID
+    const inSurvey = new Set(questionsData.map(q => q._id));
+
+    const pickList = document.getElementById('pickQuestionList');
+    pickList.innerHTML = allQuestions.length === 0
+      ? '<p class="text-secondary text-center">题目库中没有题目，请先去创建</p>'
+      : allQuestions.map(q => `
+        <div class="card" style="padding:0.8rem;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <strong>${escapeHtml(q.title)}</strong>
+            <span class="question-type" style="margin-left:8px;">${typeLabels[q.type]}</span>
+            ${q.version > 1 ? `<span class="badge badge-draft" style="margin-left:4px;">v${q.version}</span>` : ''}
+          </div>
+          ${inSurvey.has(q._id)
+            ? '<span class="text-secondary" style="font-size:0.8rem;">已添加</span>'
+            : `<button class="btn btn-success btn-sm" onclick="pickQuestion('${q._id}')">添加</button>`
+          }
+        </div>
+      `).join('');
+
+    pickModal.classList.remove('hidden');
+    pickModal.style.display = 'flex';
+  } catch (err) {
+    showAlert(err.message);
+  }
+});
+
+document.getElementById('cancelPick').addEventListener('click', () => {
+  pickModal.classList.add('hidden');
+  pickModal.style.display = 'none';
+});
+
+window.pickQuestion = async function(questionId) {
+  try {
+    const res = await fetch(`${API}/api/surveys/${surveyId}/questions`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ questionId }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    showAlert('已添加', 'success');
+    pickModal.classList.add('hidden');
+    pickModal.style.display = 'none';
+    loadQuestions();
+  } catch (err) {
+    showAlert(err.message);
+  }
+};
 
 loadSurvey();

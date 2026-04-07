@@ -1,5 +1,17 @@
 const mongoose = require('mongoose');
 
+const questionRefSchema = new mongoose.Schema({
+  questionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Question',
+    required: true,
+  },
+  order: {
+    type: Number,
+    required: true,
+  },
+}, { _id: false });
+
 const surveySchema = new mongoose.Schema({
   creatorId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -33,6 +45,10 @@ const surveySchema = new mongoose.Schema({
     type: String,
     unique: true,
     index: true,
+  },
+  questionRefs: {
+    type: [questionRefSchema],
+    default: [],
   },
   createdAt: {
     type: Date,

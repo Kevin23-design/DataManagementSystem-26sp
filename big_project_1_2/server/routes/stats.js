@@ -7,6 +7,28 @@ const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
+/**
+ * 从 survey.questionRefs 加载题目并按 order 排序
+ */
+async function loadSurveyQuestions(survey) {
+  const refs = [...survey.questionRefs].sort((a, b) => a.order - b.order);
+  const questionIds = refs.map(ref => ref.questionId);
+  const questions = await Question.find({ _id: { $in: questionIds } });
+
+  const questionMap = {};
+  for (const q of questions) {
+    questionMap[q._id.toString()] = q;
+  }
+
+  return refs.map(ref => {
+    const q = questionMap[ref.questionId.toString()];
+    if (!q) return null;
+    const qObj = q.toObject();
+    qObj.order = ref.order;
+    return qObj;
+  }).filter(Boolean);
+}
+
 // GET /api/surveys/:id/stats - 获取整卷统计
 router.get('/:id/stats', auth, async (req, res) => {
   try {
@@ -18,14 +40,14 @@ router.get('/:id/stats', auth, async (req, res) => {
       return res.status(403).json({ error: '无权限查看统计' });
     }
 
-    const questions = await Question.find({ surveyId: survey._id }).sort({ order: 1 });
+    const questions = await loadSurveyQuestions(survey);
     const responses = await Response.find({ surveyId: survey._id });
 
     const totalResponses = responses.length;
     const questionStats = [];
 
     for (const question of questions) {
-      const stat = await getQuestionStats(question, responses);
+      const stat = getQuestionStats(question, responses);
       questionStats.push(stat);
     }
 
@@ -52,12 +74,20 @@ router.get('/:id/stats/:questionId', auth, async (req, res) => {
     }
 
     const question = await Question.findById(req.params.questionId);
-    if (!question || question.surveyId.toString() !== survey._id.toString()) {
+    if (!question) {
       return res.status(404).json({ error: '题目不存在' });
     }
 
+    // 验证题目在问卷中
+    const ref = survey.questionRefs.find(
+      r => r.questionId.toString() === question._id.toString(),
+    );
+    if (!ref) {
+      return res.status(404).json({ error: '题目不在该问卷中' });
+    }
+
     const responses = await Response.find({ surveyId: survey._id });
-    const stat = await getQuestionStats(question, responses);
+    const stat = getQuestionStats({ ...question.toObject(), order: ref.order }, responses);
     res.json(stat);
   } catch (err) {
     res.status(500).json({ error: '服务器错误' });
@@ -67,7 +97,7 @@ router.get('/:id/stats/:questionId', auth, async (req, res) => {
 /**
  * 计算单道题的统计数据
  */
-async function getQuestionStats(question, responses) {
+function getQuestionStats(question, responses) {
   const qId = question._id.toString();
   const answeredValues = [];
 

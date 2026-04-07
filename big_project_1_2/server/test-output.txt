@@ -1,0 +1,105 @@
+﻿  console.log
+    [dotenv@17.3.1] injecting env (3) from .env -- tip: 馃攼 prevent committing .env to code: https://dotenvx.com/precommit
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+  console.log
+    [dotenv@17.3.1] injecting env (0) from .env -- tip: 鈿欙笍  suppress all logs with { quiet: true }
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+node.exe : PASS tests/surve
+y-system.e2e.test.js (6.869
+ s)
+所在位置 行:1 字符: 1
++ & "F:\CodeSoftware\nodejs
+/node.exe" "F:\CodeSoftware
+\nodejs/node_modu ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (PAS  
+  S tests/surv...st.js (   
+ 6.869 s):String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+  闂嵎绯荤粺 v1.2 瀹屾暣鐗堟祴璇?    1
+) 鍒涘缓闂嵎娴嬭瘯
+      鈭?鍒涘缓闂嵎鎴愬姛锛堝凡鐧诲綍锛?(2
+88 ms)
+      鈭?鍒涘缓闂嵎澶辫触锛堟湭鐧诲綍锛?(3
+3 ms)
+    2) 娣诲姞棰樼洰娴嬭瘯锛堟柊妯″紡锛氫粠棰樼
+洰搴?鐩存帴鏂板缓锛?      鈭?鍙湪闂嵎鍐呯
+洿鎺ユ柊寤哄洓绫婚鍨?(289 ms)
+      鈭?鍙粠棰樼洰搴撻€夐娣诲姞鍒伴棶鍗?
+(212 ms)
+      鈭?鍙戝竷鍚庝笉鍙坊鍔犻鐩?(216 
+ms)
+    3) 璺宠浆閫昏緫娴嬭瘯
+      鈭?鍛戒腑鍗曢€夎烦杞鍒欐椂璺宠繃涓
+棿棰?(286 ms)
+      鈭?涓嶅懡涓烦杞鍒欐椂鎸夐粯璁ら『搴
+忚蛋涓嬩竴棰?(259 ms)
+    4) 鏍￠獙娴嬭瘯
+      鈭?蹇呯瓟棰樹负绌烘椂鎻愪氦澶辫触 (16
+6 ms)
+      鈭?澶氶€夋暟閲忎笌鏁板瓧鑼冨洿鏍￠獙鐢熸
+晥 (237 ms)
+    5) 鎻愪氦闂嵎娴嬭瘯
+      鈭?鍖垮悕闂嵎鍙尶鍚嶆彁浜わ紝涓斿彲澶
+氭鎻愪氦 (196 ms)
+      鈭?闈炲尶鍚嶉棶鍗锋湭鐧诲綍鎻愪氦澶辫触锛
+岀櫥褰曞悗鎴愬姛 (245 ms)
+    6) 缁熻娴嬭瘯
+      鈭?缁熻鎺ュ彛杩斿洖鍗曢€夎鏁颁笌鏁板
+瓧鑱氬悎缁撴灉 (249 ms)
+      鈭?闈炲垱寤鸿€呮棤鏉冮檺鏌ョ湅缁熻 (
+289 ms)
+    7) 棰樼洰鐙珛绠＄悊娴嬭瘯
+      鈭?鍙垱寤虹嫭绔嬮鐩苟鍒楀嚭 (13
+3 ms)
+      鈭?涓€涓鐩彲琚涓棶鍗蜂娇鐢?
+(175 ms)
+    8) 棰樼洰鍏变韩娴嬭瘯
+      鈭?鍙叡浜鐩粰鍏朵粬鐢ㄦ埛 (23
+3 ms)
+    9) 鐗堟湰绠＄悊娴嬭瘯
+      鈭?淇敼琚凡鍙戝竷闂嵎寮曠敤鐨勯鐩
+椂鍒涘缓鏂扮増鏈?(179 ms)
+      鈭?鍙煡鐪嬬増鏈巻鍙?(169 ms)
+      鈭?鍙仮澶嶆棫鐗堟湰 (142 ms)
+    10) 淇敼涓嶅奖鍝嶅凡鍙戝竷闂嵎
+      鈭?宸插彂甯冮棶鍗蜂繚鎸佹棫鐗堟湰棰樼洰 
+(202 ms)
+    11) 鏌ョ湅棰樼洰寮曠敤
+      鈭?鍙煡鐪嬮鐩鍝簺闂嵎浣跨敤 
+(261 ms)
+    12) 棰樺簱娴嬭瘯
+      鈭?鍙垱寤洪搴撳苟娣诲姞棰樼洰 (19
+0 ms)
+    13) 璺ㄩ棶鍗风粺璁℃祴璇?      鈭?
+鍙煡鐪嬮鐩湪鎵€鏈夐棶鍗蜂腑鐨勫洖绛旂粺璁?(3
+30 ms)
+
+Test Suites: 1 passed, 1 to
+tal
+Tests:       23 passed, 23 
+total
+Snapshots:   0 total
+Time:        6.98 s, estima
+ted 7 s
+Ran all test suites.
+npm notice
+npm notice New minor versio
+n of npm available! 11.6.1 
+-> 11.12.1
+npm notice Changelog: https
+://github.com/npm/cli/relea
+ses/tag/v11.12.1
+npm notice To update run: n
+pm install -g npm@11.12.1
+npm notice

@@ -8,6 +8,29 @@ const { getNextQuestionOrder } = require('../utils/jumpLogic');
 
 const router = express.Router();
 
+/**
+ * 从 survey.questionRefs 加载题目并按 order 排序
+ */
+async function loadSurveyQuestions(survey) {
+  const refs = [...survey.questionRefs].sort((a, b) => a.order - b.order);
+  const questionIds = refs.map(ref => ref.questionId);
+  const questions = await Question.find({ _id: { $in: questionIds } });
+
+  const questionMap = {};
+  for (const q of questions) {
+    questionMap[q._id.toString()] = q;
+  }
+
+  return refs.map(ref => {
+    const q = questionMap[ref.questionId.toString()];
+    if (!q) return null;
+    // 挂上 order（来自 survey.questionRefs）
+    const qObj = q.toObject();
+    qObj.order = ref.order;
+    return qObj;
+  }).filter(Boolean);
+}
+
 // GET /api/survey/:shareCode - 通过分享链接获取问卷和题目
 router.get('/:shareCode', optionalAuth, async (req, res) => {
   try {
@@ -27,7 +50,7 @@ router.get('/:shareCode', optionalAuth, async (req, res) => {
       return res.status(401).json({ error: '该问卷需要登录后填写' });
     }
 
-    const questions = await Question.find({ surveyId: survey._id }).sort({ order: 1 });
+    const questions = await loadSurveyQuestions(survey);
 
     res.json({
       survey: {
@@ -60,7 +83,7 @@ router.post('/:shareCode/submit', optionalAuth, async (req, res) => {
       return res.status(401).json({ error: '该问卷需要登录后填写' });
     }
 
-    const questions = await Question.find({ surveyId: survey._id }).sort({ order: 1 });
+    const questions = await loadSurveyQuestions(survey);
     const { answers: submittedAnswers } = req.body;
 
     if (!submittedAnswers || !Array.isArray(submittedAnswers)) {

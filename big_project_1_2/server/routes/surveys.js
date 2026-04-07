@@ -97,9 +97,8 @@ router.put('/:id/publish', auth, async (req, res) => {
       return res.status(400).json({ error: '只有草稿状态可以发布' });
     }
 
-    // 检查是否至少有一道题
-    const questionCount = await Question.countDocuments({ surveyId: survey._id });
-    if (questionCount === 0) {
+    // 检查是否至少有一道题（通过 questionRefs）
+    if (survey.questionRefs.length === 0) {
       return res.status(400).json({ error: '问卷至少需要一道题目才能发布' });
     }
 
@@ -144,8 +143,7 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(403).json({ error: '无权限操作' });
     }
 
-    // 级联删除题目和回答
-    await Question.deleteMany({ surveyId: survey._id });
+    // 只删除回答，不删除题目（题目现在是独立实体）
     await Response.deleteMany({ surveyId: survey._id });
     await Survey.findByIdAndDelete(survey._id);
 

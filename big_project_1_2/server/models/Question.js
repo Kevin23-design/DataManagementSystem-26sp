@@ -19,16 +19,41 @@ const jumpRuleSchema = new mongoose.Schema({
 }, { _id: false });
 
 const questionSchema = new mongoose.Schema({
-  surveyId: {
+  // ====== 归属 ======
+  creatorId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Survey',
+    ref: 'User',
     required: true,
     index: true,
   },
-  order: {
-    type: Number,
-    required: true,
+  sharedWith: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
+
+  // ====== 版本链 ======
+  rootQuestionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Question',
+    default: null,
+    index: true,
   },
+  parentVersionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Question',
+    default: null,
+  },
+  version: {
+    type: Number,
+    default: 1,
+  },
+  isLatest: {
+    type: Boolean,
+    default: true,
+    index: true,
+  },
+
+  // ====== 题目内容 ======
   type: {
     type: String,
     enum: ['single_choice', 'multiple_choice', 'text_input', 'number_input'],
@@ -63,9 +88,35 @@ const questionSchema = new mongoose.Schema({
     type: [jumpRuleSchema],
     default: [],
   },
+
+  // ====== 时间戳 ======
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-// 复合索引：按问卷+顺序查询
-questionSchema.index({ surveyId: 1, order: 1 });
+// 保存前更新时间
+questionSchema.pre('save', function () {
+  this.updatedAt = new Date();
+});
+
+// 保存后：首次创建时 rootQuestionId 指向自己
+questionSchema.post('save', async function (doc) {
+  if (!doc.rootQuestionId) {
+    await mongoose.model('Question').updateOne(
+      { _id: doc._id },
+      { $set: { rootQuestionId: doc._id } },
+    );
+    doc.rootQuestionId = doc._id;
+  }
+});
+
+// 索引
+questionSchema.index({ sharedWith: 1 });
 
 module.exports = mongoose.model('Question', questionSchema);

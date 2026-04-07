@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>问卷系统 - 编辑问卷</title>
+  <title>问卷系统 - 题目库</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -11,33 +11,32 @@
     <a href="/dashboard.html" class="nav-brand">问卷系统</a>
     <div class="nav-actions">
       <a href="/dashboard.html" class="btn btn-outline btn-sm">问卷</a>
-      <a href="/question-lib.html" class="btn btn-outline btn-sm">题目库</a>
+      <a href="/question-lib.html" class="btn btn-primary btn-sm">题目库</a>
       <a href="/question-bank.html" class="btn btn-outline btn-sm">题库</a>
       <span class="nav-user" id="navUser"></span>
+      <button class="btn btn-outline btn-sm" id="logoutBtn">退出</button>
     </div>
   </nav>
 
   <div class="container">
     <div class="page-header">
-      <h1 id="pageTitle">编辑问卷</h1>
-      <div class="inline-actions">
-        <button class="btn btn-outline btn-sm" id="backBtn">← 返回</button>
-        <button class="btn btn-primary btn-sm" id="addQuestionBtn">+ 新建题目</button>
-        <button class="btn btn-outline btn-sm" id="pickQuestionBtn">📋 从题目库选题</button>
+      <h1>题目库</h1>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="createQuestionBtn">+ 创建题目</button>
       </div>
     </div>
 
     <div id="alert"></div>
-
-    <div class="card mb-2" id="surveyInfo"></div>
-
     <div id="questionList" class="stack"></div>
+    <div id="emptyTip" class="card text-center text-secondary hidden">
+      还没有题目，点击上方按钮创建一个吧。
+    </div>
   </div>
 
-  <!-- 新建题目弹窗 -->
+  <!-- 创建/编辑题目弹窗 -->
   <div id="questionModal" class="modal hidden">
     <div class="modal-panel">
-      <h2 id="modalTitle" class="modal-title">添加题目</h2>
+      <h2 id="modalTitle" class="modal-title">创建题目</h2>
       <form id="questionForm">
         <div class="form-group">
           <label for="qTitle">题目标题</label>
@@ -83,17 +82,55 @@
     </div>
   </div>
 
-  <!-- 从题目库选题弹窗 -->
-  <div id="pickModal" class="modal hidden">
+  <!-- 共享弹窗 -->
+  <div id="shareModal" class="modal hidden">
     <div class="modal-panel">
-      <h2 class="modal-title">从题目库选题</h2>
-      <div id="pickQuestionList" class="stack"></div>
+      <h2 class="modal-title">共享题目</h2>
+      <div class="form-group">
+        <label for="shareUsername">输入用户名</label>
+        <input type="text" id="shareUsername" class="form-control" placeholder="要共享给的用户名">
+      </div>
+      <div id="shareAlert"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline" id="cancelPick">关闭</button>
+        <button type="button" class="btn btn-outline" id="cancelShare">取消</button>
+        <button type="button" class="btn btn-primary" id="confirmShare">共享</button>
       </div>
     </div>
   </div>
 
-  <script src="/js/create.js"></script>
+  <!-- 版本历史弹窗 -->
+  <div id="versionsModal" class="modal hidden">
+    <div class="modal-panel">
+      <h2 class="modal-title">版本历史</h2>
+      <div id="versionsList" class="stack"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="closeVersions">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 引用详情弹窗 -->
+  <div id="surveysModal" class="modal hidden">
+    <div class="modal-panel">
+      <h2 class="modal-title">引用此题的问卷</h2>
+      <div id="surveyRefsList" class="stack"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="closeSurveyRefs">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 跨问卷统计弹窗 -->
+  <div id="crossStatsModal" class="modal hidden">
+    <div class="modal-panel">
+      <h2 class="modal-title">跨问卷统计</h2>
+      <div id="crossStatsContent"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="closeCrossStats">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/question-lib.js"></script>
 </body>
 </html>
