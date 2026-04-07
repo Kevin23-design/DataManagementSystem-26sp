@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>问卷系统 - 我的问卷</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="nav">
+    <span class="nav-brand">问卷系统</span>
+    <div class="nav-actions">
+      <button class="nav-user-btn" id="navUserBtn" type="button" title="查看账户信息">
+        <span class="nav-user" id="navUser"></span>
+      </button>
+      <button class="btn btn-outline btn-sm" id="logoutBtn">退出</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>我的问卷</h1>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="createBtn">+ 创建问卷</button>
+      </div>
+    </div>
+
+    <div id="alert"></div>
+    <div id="surveyList" class="stack"></div>
+    <div id="emptyTip" class="card text-center text-secondary hidden">
+      还没有问卷，点击上方按钮创建一个吧。
+    </div>
+  </div>
+
+  <div id="createModal" class="modal hidden">
+    <div class="modal-panel">
+      <h2 class="modal-title">创建问卷</h2>
+      <form id="createForm">
+        <div class="form-group">
+          <label for="surveyTitle">问卷标题</label>
+          <input type="text" id="surveyTitle" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="surveyDesc">问卷说明</label>
+          <textarea id="surveyDesc" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="surveyDeadline">截止时间（可选）</label>
+          <input type="datetime-local" id="surveyDeadline" class="form-control">
+        </div>
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="surveyAnonymous">
+          <label for="surveyAnonymous">允许匿名填写</label>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="cancelCreate">取消</button>
+          <button type="submit" class="btn btn-primary">创建</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="userInfoModal" class="modal hidden">
+    <div class="modal-panel">
+      <h2 class="modal-title">账户信息</h2>
+      <div class="card mb-1">
+        <div class="form-group mb-2">
+          <label>用户名</label>
+          <div id="profileUsername" class="text-secondary"></div>
+        </div>
+        <div class="form-group">
+          <label>注册时间</label>
+          <div id="profileCreatedAt" class="text-secondary">加载中...</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="closeUserInfo">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>
