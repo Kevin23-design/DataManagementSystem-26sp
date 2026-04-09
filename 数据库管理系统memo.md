@@ -23,3 +23,12 @@ jupyter notebook
 ```
 
 网页访问，file->save as html->ctrl P 打印成pdf 
+
+# 启动jupyter lab
+
+```bash
+jupyter lab
+```
+
+
+psql -h pgm-uf67ua6nah7b72h99o.rwlb.rds.aliyuncs.com -p 5432 -U ecnu10245102456 -d ecnu10245012456
